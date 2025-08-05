@@ -118,32 +118,34 @@ export default function ClientCreation() {
   };
 
   return (
-    <Container maxWidth="lg">
+    <Container maxWidth="xl" sx={{ px: { xs: 1, sm: 2, md: 3 } }}>
       <Box
         sx={{
           minHeight: "100vh",
-          py: 4,
+          py: { xs: 2, sm: 3, md: 4 },
         }}
       >
         <Fade in timeout={800}>
           <Paper
             elevation={12}
             sx={{
-              borderRadius: 4,
+              borderRadius: { xs: 2, sm: 3, md: 4 },
               overflow: "hidden",
               background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
               p: 0.3,
+              mx: { xs: 0, sm: 1, md: 2 },
             }}
           >
             <Card
               sx={{
-                borderRadius: 3.7,
+                borderRadius: { xs: 1.7, sm: 2.7, md: 3.7 },
                 background: "#ffffff",
-                minWidth: 600,
+                minWidth: { xs: "100%", sm: 400, md: 600 },
+                maxWidth: "100%",
               }}
             >
-              <CardContent sx={{ p: 4 }}>
-                <Box textAlign="center" mb={3}>
+              <CardContent sx={{ p: { xs: 2, sm: 3, md: 4 } }}>
+                <Box textAlign="center" mb={{ xs: 2, sm: 3 }}>
                   <Typography
                     variant="h4"
                     component="h2"
@@ -153,24 +155,34 @@ export default function ClientCreation() {
                       backgroundClip: "text",
                       WebkitBackgroundClip: "text",
                       color: "transparent",
+                      fontSize: { xs: "1.5rem", sm: "2rem", md: "2.125rem" },
                     }}
                   >
                     Client Management
                   </Typography>
-                  <Typography variant="body2" color="text.secondary" mt={1}>
+                  <Typography 
+                    variant="body2" 
+                    color="text.secondary" 
+                    mt={1}
+                    sx={{ fontSize: { xs: "0.75rem", sm: "0.875rem" } }}
+                  >
                     Create new clients or manage existing ones
                   </Typography>
                 </Box>
 
-                <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: 3 }}>
+                <Box sx={{ borderBottom: 1, borderColor: 'divider', mb: { xs: 2, sm: 3 } }}>
                   <Tabs 
                     value={tabValue} 
                     onChange={(e, newValue) => setTabValue(newValue)}
                     centered
+                    variant="scrollable"
+                    scrollButtons="auto"
                     sx={{
                       "& .MuiTab-root": {
                         textTransform: "none",
                         fontWeight: 600,
+                        fontSize: { xs: "0.875rem", sm: "1rem" },
+                        minHeight: { xs: 40, sm: 48 },
                       },
                       "& .Mui-selected": {
                         color: "#667eea !important",
@@ -186,7 +198,15 @@ export default function ClientCreation() {
                 </Box>
 
                 {tabValue === 0 && (
-                  <Box component="form" onSubmit={handleSubmit} sx={{ mt: 3 }}>
+                  <Box 
+                    component="form" 
+                    onSubmit={handleSubmit} 
+                    sx={{ 
+                      mt: { xs: 2, sm: 3 },
+                      maxWidth: { xs: "100%", sm: 500 },
+                      mx: "auto"
+                    }}
+                  >
                     <TextField
                       fullWidth
                       label="Email Address"
@@ -199,6 +219,7 @@ export default function ClientCreation() {
                       sx={{
                         "& .MuiOutlinedInput-root": {
                           borderRadius: 2,
+                          height: { xs: "40px", sm: "56px" },
                           "&:hover fieldset": {
                             borderColor: "#667eea",
                           },
@@ -206,8 +227,14 @@ export default function ClientCreation() {
                             borderColor: "#667eea",
                           },
                         },
-                        "& .MuiInputLabel-root.Mui-focused": {
-                          color: "#667eea",
+                        "& .MuiInputLabel-root": {
+                          fontSize: { xs: "0.875rem", sm: "1rem" },
+                          "&.Mui-focused": {
+                            color: "#667eea",
+                          },
+                        },
+                        "& .MuiInputBase-input": {
+                          fontSize: { xs: "0.875rem", sm: "1rem" },
                         },
                       }}
                     />
@@ -224,6 +251,7 @@ export default function ClientCreation() {
                       sx={{
                         "& .MuiOutlinedInput-root": {
                           borderRadius: 2,
+                          height: { xs: "40px", sm: "56px" },
                           "&:hover fieldset": {
                             borderColor: "#667eea",
                           },
@@ -231,8 +259,14 @@ export default function ClientCreation() {
                             borderColor: "#667eea",
                           },
                         },
-                        "& .MuiInputLabel-root.Mui-focused": {
-                          color: "#667eea",
+                        "& .MuiInputLabel-root": {
+                          fontSize: { xs: "0.875rem", sm: "1rem" },
+                          "&.Mui-focused": {
+                            color: "#667eea",
+                          },
+                        },
+                        "& .MuiInputBase-input": {
+                          fontSize: { xs: "0.875rem", sm: "1rem" },
                         },
                       }}
                     />
@@ -250,6 +284,7 @@ export default function ClientCreation() {
                       sx={{
                         "& .MuiOutlinedInput-root": {
                           borderRadius: 2,
+                          height: { xs: "40px", sm: "56px" },
                           "&:hover fieldset": {
                             borderColor: "#667eea",
                           },
@@ -257,8 +292,14 @@ export default function ClientCreation() {
                             borderColor: "#667eea",
                           },
                         },
-                        "& .MuiInputLabel-root.Mui-focused": {
-                          color: "#667eea",
+                        "& .MuiInputLabel-root": {
+                          fontSize: { xs: "0.875rem", sm: "1rem" },
+                          "&.Mui-focused": {
+                            color: "#667eea",
+                          },
+                        },
+                        "& .MuiInputBase-input": {
+                          fontSize: { xs: "0.875rem", sm: "1rem" },
                         },
                       }}
                     />
@@ -267,15 +308,16 @@ export default function ClientCreation() {
                       type="submit"
                       fullWidth
                       variant="contained"
-                      size="large"
                       disabled={loading}
                       sx={{
-                        mt: 3,
+                        mt: { xs: 2, sm: 3 },
                         mb: 2,
-                        py: 1.5,
+                        py: { xs: 1, sm: 1.5 },
+                        height: { xs: "40px", sm: "48px" },
                         borderRadius: 2,
                         background: "linear-gradient(135deg, #667eea 0%, #764ba2 100%)",
                         boxShadow: "0 4px 15px 0 rgba(102, 126, 234, 0.4)",
+                        fontSize: { xs: "0.875rem", sm: "1rem" },
                         "&:hover": {
                           background: "linear-gradient(135deg, #5a67d8 0%, #6b46a3 100%)",
                           boxShadow: "0 6px 20px 0 rgba(102, 126, 234, 0.6)",
@@ -300,28 +342,82 @@ export default function ClientCreation() {
                 )}
 
                 {tabValue === 1 && (
-                  <Box sx={{ mt: 3 }}>
+                  <Box sx={{ mt: { xs: 2, sm: 3 } }}>
                     {loadingClients ? (
                       <Box display="flex" justifyContent="center" py={4}>
                         <CircularProgress />
                       </Box>
                     ) : (
-                      <TableContainer component={Paper} elevation={0} sx={{ border: 1, borderColor: 'divider' }}>
-                        <Table>
+                      <TableContainer 
+                        component={Paper} 
+                        elevation={0} 
+                        sx={{ 
+                          border: 1, 
+                          borderColor: 'divider',
+                          overflowX: 'auto',
+                          '& .MuiTable-root': {
+                            minWidth: { xs: 650, sm: 'auto' }
+                          }
+                        }}
+                      >
+                        <Table sx={{ minWidth: { xs: 300, sm: 650 } }}>
                           <TableHead>
                             <TableRow sx={{ backgroundColor: '#f5f5f5' }}>
-                              <TableCell sx={{ fontWeight: 'bold' }}>Email</TableCell>
-                              <TableCell sx={{ fontWeight: 'bold' }}>Domain</TableCell>
-                              <TableCell sx={{ fontWeight: 'bold' }}>Site ID</TableCell>
-                              <TableCell sx={{ fontWeight: 'bold' }}>Status</TableCell>
-                              <TableCell align="center" sx={{ fontWeight: 'bold' }}>Actions</TableCell>
+                              <TableCell sx={{ 
+                                fontWeight: 'bold',
+                                fontSize: { xs: "0.75rem", sm: "0.875rem" },
+                                px: { xs: 1, sm: 2 }
+                              }}>
+                                Email
+                              </TableCell>
+                              <TableCell sx={{ 
+                                fontWeight: 'bold',
+                                fontSize: { xs: "0.75rem", sm: "0.875rem" },
+                                px: { xs: 1, sm: 2 },
+                                display: { xs: 'none', sm: 'table-cell' }
+                              }}>
+                                Domain
+                              </TableCell>
+                              <TableCell sx={{ 
+                                fontWeight: 'bold',
+                                fontSize: { xs: "0.75rem", sm: "0.875rem" },
+                                px: { xs: 1, sm: 2 },
+                                display: { xs: 'none', md: 'table-cell' }
+                              }}>
+                                Site ID
+                              </TableCell>
+                              <TableCell sx={{ 
+                                fontWeight: 'bold',
+                                fontSize: { xs: "0.75rem", sm: "0.875rem" },
+                                px: { xs: 1, sm: 2 },
+                                display: { xs: 'none', sm: 'table-cell' }
+                              }}>
+                                Status
+                              </TableCell>
+                              <TableCell 
+                                align="center" 
+                                sx={{ 
+                                  fontWeight: 'bold',
+                                  fontSize: { xs: "0.75rem", sm: "0.875rem" },
+                                  px: { xs: 1, sm: 2 }
+                                }}
+                              >
+                                Actions
+                              </TableCell>
                             </TableRow>
                           </TableHead>
                           <TableBody>
                             {clients.length === 0 ? (
                               <TableRow>
-                                <TableCell colSpan={5} align="center" sx={{ py: 4 }}>
-                                  <Typography color="text.secondary">
+                                <TableCell 
+                                  colSpan={5}
+                                  align="center" 
+                                  sx={{ py: { xs: 2, sm: 4 } }}
+                                >
+                                  <Typography 
+                                    color="text.secondary"
+                                    fontSize={{ xs: "0.875rem", sm: "1rem" }}
+                                  >
                                     No clients found
                                   </Typography>
                                 </TableCell>
@@ -329,14 +425,54 @@ export default function ClientCreation() {
                             ) : (
                               clients.map((client) => (
                                 <TableRow key={client._id} hover>
-                                  <TableCell>{client.email}</TableCell>
-                                  <TableCell>{client.sites?.[0]?.domain || 'N/A'}</TableCell>
-                                  <TableCell>
-                                    <Typography variant="body2" sx={{ fontFamily: 'monospace' }}>
+                                  <TableCell sx={{ 
+                                    px: { xs: 1, sm: 2 },
+                                    fontSize: { xs: "0.75rem", sm: "0.875rem" }
+                                  }}>
+                                    <Box>
+                                      <Typography variant="body2" noWrap>
+                                        {client.email}
+                                      </Typography>
+                                      {/* Show domain and status on mobile */}
+                                      <Box sx={{ display: { xs: 'block', sm: 'none' }, mt: 0.5 }}>
+                                        <Typography variant="caption" color="text.secondary">
+                                          {client.sites?.[0]?.domain || 'N/A'}
+                                        </Typography>
+                                        <Chip 
+                                          label="Active" 
+                                          size="small" 
+                                          color="success" 
+                                          variant="outlined"
+                                          sx={{ ml: 1, height: 16, fontSize: '0.625rem' }}
+                                        />
+                                      </Box>
+                                    </Box>
+                                  </TableCell>
+                                  <TableCell sx={{ 
+                                    px: { xs: 1, sm: 2 },
+                                    fontSize: { xs: "0.75rem", sm: "0.875rem" },
+                                    display: { xs: 'none', sm: 'table-cell' }
+                                  }}>
+                                    {client.sites?.[0]?.domain || 'N/A'}
+                                  </TableCell>
+                                  <TableCell sx={{ 
+                                    px: { xs: 1, sm: 2 },
+                                    display: { xs: 'none', md: 'table-cell' }
+                                  }}>
+                                    <Typography 
+                                      variant="body2" 
+                                      sx={{ 
+                                        fontFamily: 'monospace',
+                                        fontSize: { xs: "0.625rem", sm: "0.75rem" }
+                                      }}
+                                    >
                                       {client.sites?.[0]?._id || 'N/A'}
                                     </Typography>
                                   </TableCell>
-                                  <TableCell>
+                                  <TableCell sx={{ 
+                                    px: { xs: 1, sm: 2 },
+                                    display: { xs: 'none', sm: 'table-cell' }
+                                  }}>
                                     <Chip 
                                       label="Active" 
                                       size="small" 
@@ -344,22 +480,32 @@ export default function ClientCreation() {
                                       variant="outlined"
                                     />
                                   </TableCell>
-                                  <TableCell align="center">
-                                    <IconButton 
-                                      size="small" 
-                                      color="primary"
-                                      title="View Details"
-                                    >
-                                      <ViewIcon />
-                                    </IconButton>
-                                    <IconButton 
-                                      size="small" 
-                                      color="error"
-                                      title="Delete Client"
-                                      onClick={() => setDeleteDialog({ open: true, client })}
-                                    >
-                                      <DeleteIcon />
-                                    </IconButton>
+                                  <TableCell align="center" sx={{ px: { xs: 1, sm: 2 } }}>
+                                    <Box sx={{ display: 'flex', justifyContent: 'center', gap: 0.5 }}>
+                                      <IconButton 
+                                        size="small" 
+                                        color="primary"
+                                        title="View Details"
+                                        sx={{ 
+                                          minWidth: 'auto',
+                                          p: { xs: 0.5, sm: 1 }
+                                        }}
+                                      >
+                                        <ViewIcon sx={{ fontSize: { xs: '1rem', sm: '1.25rem' } }} />
+                                      </IconButton>
+                                      <IconButton 
+                                        size="small" 
+                                        color="error"
+                                        title="Delete Client"
+                                        onClick={() => setDeleteDialog({ open: true, client })}
+                                        sx={{ 
+                                          minWidth: 'auto',
+                                          p: { xs: 0.5, sm: 1 }
+                                        }}
+                                      >
+                                        <DeleteIcon sx={{ fontSize: { xs: '1rem', sm: '1.25rem' } }} />
+                                      </IconButton>
+                                    </Box>
                                   </TableCell>
                                 </TableRow>
                               ))
@@ -378,6 +524,7 @@ export default function ClientCreation() {
                       sx={{
                         mt: 2,
                         borderRadius: 2,
+                        fontSize: { xs: "0.75rem", sm: "0.875rem" },
                         "& .MuiAlert-icon": {
                           alignItems: "center",
                         },
@@ -396,15 +543,26 @@ export default function ClientCreation() {
         <Dialog
           open={deleteDialog.open}
           onClose={() => setDeleteDialog({ open: false, client: null })}
+          maxWidth="sm"
+          fullWidth
+          sx={{
+            '& .MuiDialog-paper': {
+              mx: { xs: 2, sm: 3 },
+              my: { xs: 2, sm: 4 },
+              width: { xs: 'calc(100% - 32px)', sm: 'auto' }
+            }
+          }}
         >
-          <DialogTitle>Confirm Delete</DialogTitle>
+          <DialogTitle sx={{ fontSize: { xs: "1.125rem", sm: "1.25rem" } }}>
+            Confirm Delete
+          </DialogTitle>
           <DialogContent>
-            <DialogContentText>
+            <DialogContentText sx={{ fontSize: { xs: "0.875rem", sm: "1rem" } }}>
               Are you sure you want to delete the client "{deleteDialog.client?.email}"? 
               This action cannot be undone and will remove all associated data.
             </DialogContentText>
           </DialogContent>
-          <DialogActions>
+          <DialogActions sx={{ px: { xs: 2, sm: 3 }, pb: { xs: 2, sm: 2 } }}>
             <Button 
               onClick={() => setDeleteDialog({ open: false, client: null })}
               color="inherit"
