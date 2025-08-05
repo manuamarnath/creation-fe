@@ -174,7 +174,6 @@ export default function ClientCreation() {
                   <Tabs 
                     value={tabValue} 
                     onChange={(e, newValue) => setTabValue(newValue)}
-                    centered
                     variant="scrollable"
                     scrollButtons="auto"
                     sx={{
@@ -189,6 +188,9 @@ export default function ClientCreation() {
                       },
                       "& .MuiTabs-indicator": {
                         backgroundColor: "#667eea",
+                      },
+                      "& .MuiTabs-flexContainer": {
+                        justifyContent: { xs: "flex-start", sm: "center" },
                       },
                     }}
                   >
