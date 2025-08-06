@@ -103,11 +103,13 @@ export default function Training({ clients = [] }) {
     setLoading(true);
     try {
       const payload = {
-        ...newQA,
         siteId: selectedSiteId,
-        type: 'qa',
-        keywords: [newQA.question.toLowerCase()],
-        confidence: 1.0
+        question: newQA.question,
+        answer: newQA.answer,
+        keywords: newQA.question.toLowerCase().split(' ').filter(word => word.length > 2),
+        category: newQA.category,
+        confidence: 1.0,
+        type: 'qa_pair'
       };
 
       const url = editingItem 
@@ -131,12 +133,13 @@ export default function Training({ clients = [] }) {
         setEditingItem(null);
         loadTrainingData(); // Refresh the list
       } else {
-        const error = await response.json();
-        setStatus(`Failed to save: ${error.error || 'Unknown error'}`);
+        const errorText = await response.text();
+        console.error('API Error Response:', errorText);
+        setStatus(`Failed to save: ${response.status} - ${errorText}`);
       }
     } catch (error) {
-      console.error('Error saving Q&A:', error);
-      setStatus('Network error while saving');
+      console.error('Network Error:', error);
+      setStatus(`Network error: ${error.message}. Check if backend is running.`);
     }
     setLoading(false);
   };
