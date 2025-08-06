@@ -33,7 +33,8 @@ import {
   Edit as EditIcon,
   Delete as DeleteIcon,
   Save as SaveIcon,
-  Cancel as CancelIcon
+  Cancel as CancelIcon,
+  Upload as UploadIcon
 } from '@mui/icons-material';
 
 // Always use Render API since backend is deployed there
@@ -46,7 +47,10 @@ export default function Training({ clients = [] }) {
   const [loading, setLoading] = useState(false);
   const [status, setStatus] = useState('');
   const [openDialog, setOpenDialog] = useState(false);
+  const [openBulkDialog, setOpenBulkDialog] = useState(false);
   const [editingItem, setEditingItem] = useState(null);
+  const [bulkText, setBulkText] = useState('');
+  const [bulkLoading, setBulkLoading] = useState(false);
   const [newQA, setNewQA] = useState({
     question: '',
     answer: '',
@@ -184,9 +188,193 @@ export default function Training({ clients = [] }) {
     setOpenDialog(true);
   };
 
+  // Bulk import parsing function
+  const parseBulkText = (text) => {
+    const qaItems = [];
+    
+    // Split by common separators and clean up
+    const lines = text.split(/\n|\r\n?/).filter(line => line.trim());
+    
+    // Try different parsing methods
+    
+    // Method 1: Q: ... A: ... format
+    let currentQuestion = '';
+    let currentAnswer = '';
+    let mode = '';
+    
+    for (let line of lines) {
+      line = line.trim();
+      
+      // Check for Q: or Question: prefixes
+      if (line.match(/^(Q:|Question:|Q\d+:|Question\s*\d+:)/i)) {
+        // Save previous Q&A if exists
+        if (currentQuestion && currentAnswer) {
+          qaItems.push({
+            question: currentQuestion.trim(),
+            answer: currentAnswer.trim(),
+            keywords: generateKeywords(currentQuestion),
+            category: 'general'
+          });
+        }
+        currentQuestion = line.replace(/^(Q:|Question:|Q\d+:|Question\s*\d+:)/i, '').trim();
+        currentAnswer = '';
+        mode = 'question';
+      }
+      // Check for A: or Answer: prefixes
+      else if (line.match(/^(A:|Answer:|A\d+:|Answer\s*\d+:)/i)) {
+        currentAnswer = line.replace(/^(A:|Answer:|A\d+:|Answer\s*\d+:)/i, '').trim();
+        mode = 'answer';
+      }
+      // Continue building current question or answer
+      else if (line) {
+        if (mode === 'question') {
+          currentQuestion += ' ' + line;
+        } else if (mode === 'answer') {
+          currentAnswer += ' ' + line;
+        }
+      }
+    }
+    
+    // Don't forget the last Q&A pair
+    if (currentQuestion && currentAnswer) {
+      qaItems.push({
+        question: currentQuestion.trim(),
+        answer: currentAnswer.trim(),
+        keywords: generateKeywords(currentQuestion),
+        category: 'general'
+      });
+    }
+    
+    // Method 2: If no Q&A format found, try question-answer on separate lines
+    if (qaItems.length === 0) {
+      for (let i = 0; i < lines.length - 1; i += 2) {
+        const question = lines[i]?.trim();
+        const answer = lines[i + 1]?.trim();
+        
+        if (question && answer && question.includes('?')) {
+          qaItems.push({
+            question: question,
+            answer: answer,
+            keywords: generateKeywords(question),
+            category: 'general'
+          });
+        }
+      }
+    }
+    
+    // Method 3: JSON format detection
+    if (qaItems.length === 0) {
+      try {
+        const jsonData = JSON.parse(text);
+        if (Array.isArray(jsonData)) {
+          jsonData.forEach(item => {
+            if (item.question && item.answer) {
+              qaItems.push({
+                question: item.question,
+                answer: item.answer,
+                keywords: generateKeywords(item.question),
+                category: item.category || 'general'
+              });
+            }
+          });
+        }
+      } catch (e) {
+        // Not JSON, continue
+      }
+    }
+    
+    return qaItems;
+  };
+
+  // Generate keywords from question
+  const generateKeywords = (question) => {
+    return question
+      .toLowerCase()
+      .replace(/[^\w\s]/g, ' ') // Remove punctuation
+      .split(/\s+/)
+      .filter(word => word.length > 2 && !['the', 'and', 'for', 'are', 'but', 'not', 'you', 'all', 'can', 'how', 'what', 'when', 'where', 'why', 'who'].includes(word))
+      .slice(0, 8); // Limit to 8 keywords
+  };
+
+  // Handle bulk import
+  const handleBulkImport = async () => {
+    if (!bulkText.trim()) {
+      setStatus('Please enter some Q&A data to import');
+      return;
+    }
+
+    setBulkLoading(true);
+    setStatus('Parsing Q&A data...');
+
+    try {
+      const parsedItems = parseBulkText(bulkText);
+      
+      if (parsedItems.length === 0) {
+        setStatus('No valid Q&A pairs found. Please check your format.');
+        setBulkLoading(false);
+        return;
+      }
+
+      setStatus(`Found ${parsedItems.length} Q&A pairs. Importing to database...`);
+
+      let successCount = 0;
+      let errorCount = 0;
+
+      // Import each Q&A pair
+      for (let i = 0; i < parsedItems.length; i++) {
+        const item = parsedItems[i];
+        
+        try {
+          const response = await fetch(`${API_BASE}/training/qa`, {
+            method: 'POST',
+            headers: {
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+              siteId: selectedSiteId,
+              question: item.question,
+              answer: item.answer,
+              keywords: item.keywords,
+              category: item.category,
+              confidence: 1.0,
+              type: 'qa_pair',
+              source: 'bulk_import'
+            }),
+          });
+
+          if (response.ok) {
+            successCount++;
+          } else {
+            errorCount++;
+            console.error(`Failed to import item ${i + 1}:`, await response.text());
+          }
+        } catch (error) {
+          errorCount++;
+          console.error(`Error importing item ${i + 1}:`, error);
+        }
+
+        // Add small delay to avoid overwhelming the API
+        if (i < parsedItems.length - 1) {
+          await new Promise(resolve => setTimeout(resolve, 100));
+        }
+      }
+
+      setStatus(`Bulk import completed! ${successCount} items imported successfully, ${errorCount} failed.`);
+      setBulkText('');
+      setOpenBulkDialog(false);
+      loadTrainingData(); // Refresh the list
+
+    } catch (error) {
+      console.error('Bulk import error:', error);
+      setStatus(`Bulk import failed: ${error.message}`);
+    }
+
+    setBulkLoading(false);
+  };
+
   const getAlertSeverity = () => {
-    if (status.includes('successfully') || status.includes('Loaded')) return 'success';
-    if (status.includes('Failed') || status.includes('Error') || status.includes('Network error')) return 'error';
+    if (status.includes('successfully') || status.includes('Loaded') || status.includes('completed')) return 'success';
+    if (status.includes('Failed') || status.includes('Error') || status.includes('Network error') || status.includes('failed')) return 'error';
     return 'info';
   };
 
@@ -220,7 +408,7 @@ export default function Training({ clients = [] }) {
                     {site.domain} ({client.email})
                   </MenuItem>
                 ))
-              )}
+              ).flat()}
             </Select>
           </FormControl>
           
@@ -235,24 +423,41 @@ export default function Training({ clients = [] }) {
       {selectedSiteId && (
         <Fade in timeout={500}>
           <Box>
-            {/* Add New Q&A Button */}
-            <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            {/* Add New Q&A and Bulk Import Buttons */}
+            <Box sx={{ mb: 3, display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: 2 }}>
               <Typography variant="h6">
                 Training Data ({trainingData.length} items)
               </Typography>
-              <Button
-                variant="contained"
-                startIcon={<AddIcon />}
-                onClick={handleOpenDialog}
-                sx={{
-                  background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
-                  '&:hover': {
-                    background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
-                  }
-                }}
-              >
-                Add Q&A
-              </Button>
+              <Box sx={{ display: 'flex', gap: 1, flexWrap: 'wrap' }}>
+                <Button
+                  variant="outlined"
+                  startIcon={<UploadIcon />}
+                  onClick={() => setOpenBulkDialog(true)}
+                  sx={{
+                    borderColor: '#667eea',
+                    color: '#667eea',
+                    '&:hover': {
+                      borderColor: '#5a6fd8',
+                      backgroundColor: 'rgba(102, 126, 234, 0.04)',
+                    }
+                  }}
+                >
+                  Bulk Import
+                </Button>
+                <Button
+                  variant="contained"
+                  startIcon={<AddIcon />}
+                  onClick={handleOpenDialog}
+                  sx={{
+                    background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+                    '&:hover': {
+                      background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
+                    }
+                  }}
+                >
+                  Add Q&A
+                </Button>
+              </Box>
             </Box>
 
             {/* Training Data Table */}
@@ -276,7 +481,7 @@ export default function Training({ clients = [] }) {
                       <TableRow>
                         <TableCell colSpan={4} sx={{ textAlign: 'center', py: 4 }}>
                           <Typography color="text.secondary">
-                            No training data yet. Add your first Q&A pair to get started!
+                            No training data yet. Add your first Q&A pair or use bulk import to get started!
                           </Typography>
                         </TableCell>
                       </TableRow>
@@ -410,6 +615,96 @@ export default function Training({ clients = [] }) {
             }}
           >
             {loading ? <CircularProgress size={20} /> : (editingItem ? 'Update' : 'Add')}
+          </Button>
+        </DialogActions>
+      </Dialog>
+
+      {/* Bulk Import Dialog */}
+      <Dialog 
+        open={openBulkDialog} 
+        onClose={() => setOpenBulkDialog(false)}
+        maxWidth="lg"
+        fullWidth
+      >
+        <DialogTitle>
+          Bulk Import Q&A Pairs
+        </DialogTitle>
+        <DialogContent>
+          <Box sx={{ pt: 1 }}>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 2 }}>
+              Paste your Q&A data in any of these formats:
+            </Typography>
+            
+            <Box sx={{ mb: 2, p: 2, backgroundColor: '#f5f5f5', borderRadius: 1 }}>
+              <Typography variant="subtitle2" gutterBottom>Supported Formats:</Typography>
+              <Typography variant="body2" component="div">
+                <strong>Format 1:</strong> Q: Question here? A: Answer here<br/>
+                <strong>Format 2:</strong> Question on one line, Answer on next line<br/>
+                <strong>Format 3:</strong> JSON array with question/answer objects
+              </Typography>
+            </Box>
+            
+            <TextField
+              fullWidth
+              label="Paste your Q&A data here"
+              multiline
+              rows={12}
+              value={bulkText}
+              onChange={(e) => setBulkText(e.target.value)}
+              placeholder={`Example formats:
+
+Format 1:
+Q: What services do you offer?
+A: We provide web development, SEO, and digital marketing services.
+
+Q: How much does a website cost?
+A: Our websites start at $2,500 for basic sites.
+
+Format 2:
+What are your business hours?
+We're open Monday-Friday 9AM-6PM EST.
+
+Do you offer support?
+Yes, we provide 24/7 customer support.
+
+Format 3:
+[
+  {
+    "question": "What is your return policy?",
+    "answer": "We offer 30-day returns on all products.",
+    "category": "support"
+  }
+]`}
+              sx={{ mb: 2 }}
+            />
+            
+            {bulkText.trim() && (
+              <Typography variant="body2" color="text.secondary">
+                Text length: {bulkText.length} characters
+              </Typography>
+            )}
+          </Box>
+        </DialogContent>
+        <DialogActions>
+          <Button 
+            onClick={() => setOpenBulkDialog(false)}
+            startIcon={<CancelIcon />}
+          >
+            Cancel
+          </Button>
+          <Button 
+            onClick={handleBulkImport}
+            variant="contained"
+            startIcon={<UploadIcon />}
+            disabled={bulkLoading || !bulkText.trim()}
+            sx={{
+              background: 'linear-gradient(135deg, #667eea 0%, #764ba2 100%)',
+              '&:hover': {
+                background: 'linear-gradient(135deg, #5a6fd8 0%, #6a4190 100%)',
+              }
+            }}
+          >
+            {bulkLoading ? <CircularProgress size={20} /> : 'Import Q&A Pairs'}
           </Button>
         </DialogActions>
       </Dialog>
