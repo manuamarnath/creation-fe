@@ -29,6 +29,7 @@ import {
 } from "@mui/material";
 import { Delete as DeleteIcon, Visibility as ViewIcon, Settings as SettingsIcon } from "@mui/icons-material";
 import TrainingDashboard from './TrainingDashboard.jsx';
+import Training from './Training.jsx';
 
 export default function ClientCreation() {
   const [email, setEmail] = useState("");
@@ -199,6 +200,7 @@ export default function ClientCreation() {
                     <Tab label="Create New Client" />
                     <Tab label="Manage Clients" />
                     <Tab label="Train Chatbots" />
+                    <Tab label="Direct Q&A Training" />
                   </Tabs>
                 </Box>
 
@@ -561,6 +563,12 @@ export default function ClientCreation() {
                         </Button>
                       </Box>
                     )}
+                  </Box>
+                )}
+
+                {tabValue === 3 && (
+                  <Box sx={{ mt: { xs: 2, sm: 3 } }}>
+                    <Training clients={clients} />
                   </Box>
                 )}
 
