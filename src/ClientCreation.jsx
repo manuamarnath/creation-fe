@@ -27,7 +27,8 @@ import {
   DialogTitle,
   Chip
 } from "@mui/material";
-import { Delete as DeleteIcon, Visibility as ViewIcon } from "@mui/icons-material";
+import { Delete as DeleteIcon, Visibility as ViewIcon, Settings as SettingsIcon } from "@mui/icons-material";
+import TrainingDashboard from './TrainingDashboard.jsx';
 
 export default function ClientCreation() {
   const [email, setEmail] = useState("");
@@ -39,6 +40,7 @@ export default function ClientCreation() {
   const [clients, setClients] = useState([]);
   const [loadingClients, setLoadingClients] = useState(false);
   const [deleteDialog, setDeleteDialog] = useState({ open: false, client: null });
+  const [selectedClient, setSelectedClient] = useState(null);
 
   // Fetch existing clients
   const fetchClients = async () => {
@@ -196,6 +198,7 @@ export default function ClientCreation() {
                   >
                     <Tab label="Create New Client" />
                     <Tab label="Manage Clients" />
+                    <Tab label="Train Chatbots" />
                   </Tabs>
                 </Box>
 
@@ -497,6 +500,21 @@ export default function ClientCreation() {
                                       </IconButton>
                                       <IconButton 
                                         size="small" 
+                                        color="secondary"
+                                        title="Train Chatbot"
+                                        onClick={() => {
+                                          setSelectedClient(client);
+                                          setTabValue(2);
+                                        }}
+                                        sx={{ 
+                                          minWidth: 'auto',
+                                          p: { xs: 0.5, sm: 1 }
+                                        }}
+                                      >
+                                        <SettingsIcon sx={{ fontSize: { xs: '1rem', sm: '1.25rem' } }} />
+                                      </IconButton>
+                                      <IconButton 
+                                        size="small" 
                                         color="error"
                                         title="Delete Client"
                                         onClick={() => setDeleteDialog({ open: true, client })}
@@ -515,6 +533,33 @@ export default function ClientCreation() {
                           </TableBody>
                         </Table>
                       </TableContainer>
+                    )}
+                  </Box>
+                )}
+
+                {tabValue === 2 && (
+                  <Box sx={{ mt: { xs: 2, sm: 3 } }}>
+                    {selectedClient ? (
+                      <TrainingDashboard 
+                        siteId={selectedClient.sites?.[0]?._id}
+                        siteName={selectedClient.sites?.[0]?.domain || selectedClient.email}
+                      />
+                    ) : (
+                      <Box textAlign="center" py={4}>
+                        <Typography variant="h6" color="text.secondary" gutterBottom>
+                          Select a Client to Train
+                        </Typography>
+                        <Typography variant="body2" color="text.secondary">
+                          Go to the "Manage Clients" tab and click the settings icon to start training a chatbot.
+                        </Typography>
+                        <Button
+                          variant="outlined"
+                          onClick={() => setTabValue(1)}
+                          sx={{ mt: 2 }}
+                        >
+                          View Clients
+                        </Button>
+                      </Box>
                     )}
                   </Box>
                 )}
