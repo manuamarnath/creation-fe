@@ -41,7 +41,7 @@ import {
 
 const API_BASE = process.env.NODE_ENV === 'development' 
   ? 'http://localhost:5001/api' 
-  : 'https://hybrid-chat-be.onrender.com/api';
+  : 'https://echo-ai-chat-server.onrender.com/api';
 
 function TabPanel({ children, value, index, ...other }) {
   return (
