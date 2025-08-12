@@ -47,7 +47,7 @@ export default function ClientCreation() {
   const fetchClients = async () => {
     setLoadingClients(true);
     try {
-      const res = await fetch("https://hybrid-chat-be.onrender.com/api/clients");
+      const res = await fetch("https://echo-ai-chat-server.onrender.com/api/clients");
       if (res.ok) {
         const data = await res.json();
         setClients(data.clients || []);
@@ -62,7 +62,7 @@ export default function ClientCreation() {
   // Delete client
   const handleDeleteClient = async (clientId) => {
     try {
-      const res = await fetch(`https://hybrid-chat-be.onrender.com/api/clients/${clientId}`, {
+      const res = await fetch(`https://echo-ai-chat-server.onrender.com/api/clients/${clientId}`, {
         method: "DELETE",
       });
       if (res.ok) {
@@ -88,7 +88,7 @@ export default function ClientCreation() {
     setLoading(true);
     setStatus("Creating client...");
     try {
-      const res = await fetch("https://hybrid-chat-be.onrender.com/api/create-client", {
+      const res = await fetch("https://echo-ai-chat-server.onrender.com/api/create-client", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password, domain })
