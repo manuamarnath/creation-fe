@@ -38,7 +38,7 @@ import {
 } from '@mui/icons-material';
 
 // Always use Render API since backend is deployed there
-const API_BASE = 'https://hybrid-chat-be.onrender.com/api';
+const API_BASE = 'https://echo-ai-chat-server.onrender.com/api';
 
 export default function Training({ clients = [] }) {
   const [selectedSiteId, setSelectedSiteId] = useState('');
